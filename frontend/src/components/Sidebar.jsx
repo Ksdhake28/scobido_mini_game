@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 
-const Sidebar = ({ currentSocketId }) => {
+const Sidebar = ({ currentSocketId, leaderboard = [], players = [] }) => {
   const socket = useSocket();
-  const [players, setPlayers] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
     if (!socket) return;
-
-    socket.on('leaderboard_update', ({ leaderboard, players }) => {
-      setLeaderboard(leaderboard);
-      setPlayers(players);
-    });
 
     socket.on('timer', (time) => {
       setTimer(time);
     });
 
     return () => {
-      socket.off('leaderboard_update');
       socket.off('timer');
     };
   }, [socket]);

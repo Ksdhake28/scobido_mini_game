@@ -23,6 +23,7 @@ function App() {
   const [drawerId, setDrawerId] = useState(null);
   const [wordToDraw, setWordToDraw] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [players, setPlayers] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [totalRounds, setTotalRounds] = useState(1);
   const [expirationTimer, setExpirationTimer] = useState(null);
@@ -63,8 +64,9 @@ function App() {
       setWordToDraw(null);
     });
 
-    socket.on('leaderboard_update', ({ leaderboard }) => {
+    socket.on('leaderboard_update', ({ leaderboard, players }) => {
       setLeaderboard(leaderboard);
+      if (players) setPlayers(players);
     });
 
     socket.on('room_expire_timer', (timeLeft) => {
@@ -228,7 +230,7 @@ function App() {
          <div style={{ minWidth: '100px' }}></div> {/* Spacer to keep layout balanced */}
       </div>
       <div className="game-content">
-        <Sidebar currentSocketId={socket.id} />
+        <Sidebar currentSocketId={socket.id} leaderboard={leaderboard} players={players} />
         <Canvas drawerId={drawerId} />
         <Chat />
       </div>
