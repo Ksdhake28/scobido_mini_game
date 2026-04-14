@@ -11,8 +11,9 @@ export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
 
     useEffect(() => {
-        // Connect to the backend
-        const newSocket = io('http://localhost:4000');
+        // Connect to the backend using environment variable if set, otherwise default to localhost
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const newSocket = io(backendUrl);
         setSocket(newSocket);
 
         return () => newSocket.close();
