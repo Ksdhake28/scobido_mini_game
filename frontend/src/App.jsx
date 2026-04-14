@@ -23,6 +23,8 @@ function App() {
   const [drawerId, setDrawerId] = useState(null);
   const [wordToDraw, setWordToDraw] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [currentRound, setCurrentRound] = useState(1);
+  const [totalRounds, setTotalRounds] = useState(1);
   const [expirationTimer, setExpirationTimer] = useState(null);
 
   useEffect(() => {
@@ -43,9 +45,11 @@ function App() {
        setGameStatus('playing');
     });
 
-    socket.on('round_start', ({ drawerId }) => {
+    socket.on('round_start', ({ drawerId, currentRound, totalRounds }) => {
       setDrawerId(drawerId);
       setWordToDraw(null);
+      if (currentRound) setCurrentRound(currentRound);
+      if (totalRounds) setTotalRounds(totalRounds);
       setGameStatus('playing');
     });
 
@@ -165,11 +169,21 @@ function App() {
        <div className="game-container game-over-screen" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div className="final-leaderboard" style={{ background: 'white', padding: '2rem', borderRadius: '12px', minWidth: '400px', textAlign: 'center' }}>
             <h1>Room: {roomId}</h1>
-            <h2>Waiting for players...</h2>
+            <h2 style={{ marginBottom: '1rem', color: '#7f8c8d' }}>Waiting for players...</h2>
+            
+            <div style={{ textAlign: 'left', background: '#ecf0f1', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+               <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Players Joined ({leaderboard.length}/{maxPlayers})</h3>
+               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                 {leaderboard.map((p, i) => (
+                   <li key={i} style={{ fontSize: '1.2rem', padding: '5px 0', color: '#2c3e50', fontWeight: 'bold' }}>{p.value}</li>
+                 ))}
+               </ul>
+            </div>
+
             {isAdmin ? (
-               <button onClick={handleStartGame} style={{ marginTop: '20px', padding: '10px 20px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '5px', fontSize: '18px', cursor: 'pointer' }}>Start Game</button>
+               <button onClick={handleStartGame} style={{ marginTop: '10px', padding: '12px 25px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '5px', fontSize: '18px', cursor: 'pointer', width: '100%' }}>Start Game</button>
             ) : (
-               <p style={{ marginTop: '20px', fontSize: '18px', color: '#7f8c8d' }}>Waiting for admin to start the game.</p>
+               <p style={{ marginTop: '10px', fontSize: '18px', color: '#7f8c8d' }}>Waiting for admin to start the game.</p>
             )}
           </div>
        </div>
@@ -201,13 +215,17 @@ function App() {
 
   return (
     <div className="game-container">
-      <div className="game-header">
-         <h2>Room: {roomId}</h2>
+      <div className="game-header" style={{ position: 'relative' }}>
+         <div style={{ display: 'flex', flexDirection: 'column' }}>
+           <h2>Room: {roomId}</h2>
+           <span style={{ fontSize: '1rem', color: '#ccc' }}>Round {currentRound} of {totalRounds}</span>
+         </div>
          {drawerId === socket.id ? (
-           <h2 className="word-display">Word to draw: <span className="highlight-word">{wordToDraw}</span></h2>
+           <h2 className="word-display" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>Word to draw: <span className="highlight-word">{wordToDraw}</span></h2>
          ) : (
-           <h2 className="word-display">Guess the word!</h2>
+           <h2 className="word-display" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>Guess the word!</h2>
          )}
+         <div style={{ minWidth: '100px' }}></div> {/* Spacer to keep layout balanced */}
       </div>
       <div className="game-content">
         <Sidebar currentSocketId={socket.id} />
